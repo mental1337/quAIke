@@ -10,13 +10,13 @@ function createWindow() {
   
   // Create the browser window with specified dimensions and position
   win = new BrowserWindow({
-    width: Math.floor(width * WINDOW_WIDTH_RATIO), // Set width to 80% of screen width
-    height: Math.floor(height * WINDOW_HEIGHT_RATIO), // Set height to 60% of screen height
-    x: Math.floor((width - width * WINDOW_WIDTH_RATIO) / 2), // Center the window horizontally
-    y: -Math.floor(height * WINDOW_HEIGHT_RATIO), // Start off-screen at the top (for slide-in effect)
+    width: Math.floor(width * WINDOW_WIDTH_RATIO), // Set width to 70% of screen width
+    height: Math.floor(height * WINDOW_HEIGHT_RATIO), // Set height to 70% of screen height
+    x: 0,
+    y: Math.floor((height - height * WINDOW_HEIGHT_RATIO)),
     frame: false, // Frameless window for a sleek appearance
     alwaysOnTop: true, // Keep the window always on top of other windows
-    resizable: true, // Disable window resizing
+    resizable: true,
     show: false, // Start hidden until ready to be shown
     webPreferences: {
       nodeIntegration: false, // Disable Node.js integration for security
@@ -24,84 +24,48 @@ function createWindow() {
     }
   });
 
-  // Load the Open-WebUI url
-  win.loadURL('http://localhost:8080');
+  // Load the url
+  win.loadURL('http://chatgpt.com');
 
   // Hide the window initially until it's ready to be shown
   win.once('ready-to-show', () => {
     win.hide(); // Start hidden
   });
 
-  // // Handle the close event
-  // win.on('close', () => {
-  //   win = null; // Dereference the window object
-  // });
+  // Handle the close event
+  win.on('close', () => {
+    win = null; // Dereference the window object
+  });
 }
 
 // Show Window Animation
-function slideIn() {
+function showWindow() {
   // Get the active display's work area dimensions  
-  const activeDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-  const { display_x, display_y, width, height } = activeDisplay.workArea;
-  
-  // Set initial position off-screen and make the window visible  
-  win.setBounds({x: Math.floor((width - width * WINDOW_WIDTH_RATIO) / 2), y: -Math.floor(height * WINDOW_HEIGHT_RATIO) });
+  // const activeDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  // const { width, height } = activeDisplay.workArea;
+  // // Set initial position off-screen and make the window visible  
+  // win.setBounds({ x: 0, y: Math.floor((height - height * WINDOW_HEIGHT_RATIO)) });
+
   win.show();
-
-  let start = Date.now(); // Record the start time of the animation
-  const duration = 10; // Animation duration in milliseconds
-  const targetY = 0; // Target position (fully visible at the top)
-  const startY = -Math.floor(height * WINDOW_HEIGHT_RATIO); // Starting position (off-screen)
-
-  function animate() {
-    let elapsed = Date.now() - start; // Calculate elapsed time
-    let progress = Math.min(elapsed / duration, 1); // Calculate progress (between 0 and 1)
-    let newY = Math.floor(startY + progress * (targetY - startY)); // Interpolate Y position
-    win.setBounds({ y: newY }); // Update window position
-
-    if (progress < 1) {
-      win.webContents.executeJavaScript('window.requestAnimationFrame(() => {})').then(() => animate()); // Continue animation until complete
-    }
-  }
-
-  animate(); // Start the animation
 }
 
 // Hide Window Animation
-function slideOut() {
-  // Get the height of the primary display's work area
-  const { height } = screen.getPrimaryDisplay().workAreaSize;
-  
-  let start = Date.now(); // Record the start time of the animation
-  const duration = 10; // Animation duration in milliseconds
-  const startY = 0; // Starting position (fully visible at the top)
-  const targetY = -Math.floor(height * WINDOW_HEIGHT_RATIO); // Target position (off-screen)
+function hideWindow() {
+  const activeDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  const { width, height } = activeDisplay.workArea;
 
-  function animate() {
-    let elapsed = Date.now() - start; // Calculate elapsed time
-    let progress = Math.min(elapsed / duration, 1); // Calculate progress (between 0 and 1)
-    let newY = Math.floor(startY + progress * (targetY - startY)); // Interpolate Y position
-    win.setBounds({ y: newY }); // Update window position
-
-    if (progress < 1) {
-      win.webContents.executeJavaScript('window.requestAnimationFrame(() => {})').then(() => animate()); // Continue animation until complete
-    } else {
-      win.hide(); // Hide the window once the animation is complete
-    }
-  }
-
-  animate(); // Start the animation
+  win.hide(); // Hide the window once the animation is complete
 }
 
 app.on('ready', () => {
   createWindow();
 
   // Set global shortcut, e.g., Win+F12, to toggle the window
-  globalShortcut.register('Super+Space', () => {
+  globalShortcut.register('Super+Shift+`', () => {
     if (win.isVisible()) {
-      slideOut(); // Slide out if the window is visible
+      hideWindow(); // Slide out if the window is visible
     } else {
-      slideIn(); // Slide in if the window is hidden
+      showWindow(); // Slide in if the window is hidden
     }
   });
 });
